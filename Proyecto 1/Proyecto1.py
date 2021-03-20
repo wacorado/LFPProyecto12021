@@ -10,6 +10,13 @@ class Data:
     def __init__(self,id,valor):
         self.id = id
         self.valor = valor
+class Productos:
+    def __init__(self,id,nombre,precio,descripcion):
+        self.id = id
+        self.nombre = nombre
+        self.precio = precio 
+        self.descripcion = descripcion
+
 #--------------------- Variables ---------------------------------------
 tablaErrores =[]
 tablaSimbolos=[]
@@ -24,6 +31,7 @@ banderaAutomataRestaurante = False
 banderaErNombreCliente = False
 banderaErSeccion = False
 banderaAutomataSeccion = False
+banderaAutomataProducto = False
 estado = 0
 temporal = None
 banderaErSeccion = False
@@ -31,6 +39,7 @@ idConcaten = ""
 numConcaten = ""
 cadConcaten = ""
 valor = ""
+listaProducTemp = []
 #-------------------------------------------------------------------------
 def letras(c):
     return (ord(c) >= 65 and ord(c) <= 90) or (ord(c) >= 97 and ord(c) <= 122)
@@ -45,7 +54,7 @@ def indicarEerror(simbolo, expectativa, linea, columna):
 
 def erID(c):
     global idConcaten, columna, fila, banderaAutomataId
-    if letras(c) or numeros(c) or ord(c)==95:
+    if letras(c) or numeros(c) or ord(c)==95 or ord(c)==45:
         idConcaten += c
         columna += 1
         return ;
@@ -248,6 +257,8 @@ def automataSeccion(s):
             banderaAutomataSeccion = False
             indicarEerror(a.lexema,"Seccion de Comida",a.linea,a.columna)
 
+
+    
 def leerArchivo():
     archivo = askopenfilename()#Abre la interfaz para escoger el archivo a cargar
     print(archivo)
@@ -262,42 +273,39 @@ def leerArchivo():
     print("\n")
 
 leerArchivo()
+#------------------------- Impresion de resultado Sintactico -----------------------
+print("--------------- Resultado Sintactico -----------------")
 for a in tablaSimbolos:
     print(a.token+" _ "+a.lexema)
 
-for s in range(len(tablaSimbolos)):
-    #print("Entramos al For")
-    if(tablaSimbolos[s].token=='ID' and tablaSimbolos[s].lexema=='restaurante '):
-        iterador=False
-        n=s
-        while(iterador):
-            if(tablaSimbolos[n].token=='CADENA'):
-                tablaRestaurante.append("Nombre Restaurante",tablaSimbolos[n].lexema)
-                iterador=True
-            n=n+1
-    elif(tablaSimbolos[s].token=="CADENA" and tablaSimbolos[s+1].token=="simbolo_2puntos"):
-        tablaRestaurante.append("Seccion: ",tablaSimbolos[s].lexema)
-
+#---------------------------Impresione de Errores -------------------------------
 print("\n")
 print("--------------- ERRORES CAPTURADOS -----------------")
 for obj in tablaErrores:
     print(obj)
 
+#--------------------------- Aalisis Sintactico ----------------------------------
 for s in tablaSimbolos:
     if banderaAutomataRestaurante:
         automataNombreRestaurante(s)
     elif banderaAutomataSeccion:
         automataSeccion(s)
+    #elif banderaAutomataProducto:
+        #automataProducto(s)
     elif s.token == "ID":
         estado = 0
         banderaAutomataRestaurante = True
     elif s.token == "CADENA":
-        temporal = (Data("Sección: ",s.lexema))
+        estado = 0
+        temporal = (Data("Sección ",s.lexema))
         banderaAutomataSeccion = True
+    #elif s.token == "simbolo_llave_abre":
+        #estado = 0
+        #banderaAutomataProducto = True
     else:
         indicarEerror(s.lexema,"",s.linea,s.columna)
 
 print("----------Data Restaurante ------------------------")
 for a in tablaRestaurante:
-    print(a.id + ": " + a.valor)
-
+    print(a.id + ": " + str(a.valor))
+    

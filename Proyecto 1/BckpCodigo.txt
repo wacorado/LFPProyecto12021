@@ -1,0 +1,74 @@
+def automataProducto(s):
+    global temporal,tablaRestaurante,estado,banderaAutomataProducto
+    if estado==0:
+        if s.token == "ID":
+            temporal = Data("Producto", "")
+            listaProducTemp.append(s.lexema)
+            estado = 1
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"ID de Producto",s.linea,s.columna)
+    elif estado ==1:
+        if s.token=="simbolo_PuntoComa":
+            estado=2
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,";",s.linea,s.columna)
+    elif estado==2:
+        if s.token=="CADENA":
+            estado=3
+            listaProducTemp.append(s.lexema)
+            #temporal.valor.nombre=s.lexema
+            #temporal.valor.Productos.nombre=s.lexema
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"Nombre Producto",s.linea,s.columna)
+    elif estado ==3:
+        if s.token=="simbolo_PuntoComa":
+            estado=4
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,";",s.linea,s.columna)
+    elif estado ==4:
+        if s.token=="NUMERO":
+            estado = 5
+            listaProducTemp.append(s.lexema)
+            #temporal.valor.precio=s.lexema
+            #temporal.valor.Productos.precio=s.lexema
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"Precio de Producto",s.linea,s.columna)
+    elif estado ==6:
+        if s.token=="simbolo_PuntoComa":
+            estado=7
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,";",s.linea,s.columna)
+    elif estado ==7:
+        if s.token =="CADENA":
+            estado = 8
+            listaProducTemp.append(s.lexema)
+            #temporal.valor.descripcion=s.lexema
+            #temporal.valor.Productos.descripcion=s.lexema
+            temporal.valor=listaProducTemp
+            tablaRestaurante.append(temporal)
+            temporal=None
+            listaProducTemp.clear
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"Descripcion de Producto",s.linea,s.columna)
+    elif estado==8:
+        if s.token == "simbolo_llave_cierra": #estado de aceptacion
+            estado = 0
+            banderaAutomataProducto = False
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"]",s.linea,s.columna)
