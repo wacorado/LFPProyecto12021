@@ -154,6 +154,9 @@ def analizadorLexico(c):
         valor = ""
     elif ord(c) == 32: #espacio
         columna += 1
+        idConcaten = ""
+        numConcaten = ""
+        cadConcaten = ""
         valor = ""
     elif ord(c) == 59: #;
         columna += 1
@@ -257,6 +260,79 @@ def automataSeccion(s):
             banderaAutomataSeccion = False
             indicarEerror(a.lexema,"Seccion de Comida",a.linea,a.columna)
 
+def automataProducto(s):
+    global temporal,tablaRestaurante,estado,banderaAutomataProducto,valor,listaProducTemp
+    if estado==0:
+        if(s.token=="ID"):
+            estado=1
+            temporal = Data("Producto",valor)
+            listaProducTemp.append(s.lexema)
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"ID de Producto",s.linea,s.columna)
+    elif estado==1:
+        if(s.token=="simbolo_PuntoComa"):
+            estado=2
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,";",s.linea,s.columna)
+    elif estado==2:
+        if (s.token=="CADENA"):
+            estado=3
+            listaProducTemp.append(s.lexema)
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"Nombre Producto",s.linea,s.columna)
+    elif estado ==3:
+        if s.token=="simbolo_PuntoComa":
+            estado=4
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,";",s.linea,s.columna)
+    elif estado ==4:
+        if (s.token=="NUMERO"):
+            estado = 5
+            listaProducTemp.append(s.lexema)
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"Precio de Producto",s.linea,s.columna)
+    elif estado ==5:
+        if (s.token=="simbolo_PuntoComa"):
+            estado=6
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,";",s.linea,s.columna)
+    elif estado ==6:
+        if s.token =="CADENA":
+            estado = 7
+            listaProducTemp.append(s.lexema)
+            #temporal.valor.descripcion=s.lexema
+            #temporal.valor.Productos.descripcion=s.lexema
+            temporal.valor=listaProducTemp
+            tablaRestaurante.append(temporal)
+            temporal=None
+            listaProducTemp.clear
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"Descripcion de Producto",s.linea,s.columna)
+    elif estado==7:
+        if s.token == "simbolo_llave_cierra": #estado de aceptacion
+            estado = 0
+            banderaAutomataProducto = False
+        else:
+            estado = -1
+            banderaAutomataProducto = False
+            indicarEerror(s.lexema,"]",s.linea,s.columna)
+    
+
+
 
     
 def leerArchivo():
@@ -290,8 +366,8 @@ for s in tablaSimbolos:
         automataNombreRestaurante(s)
     elif banderaAutomataSeccion:
         automataSeccion(s)
-    #elif banderaAutomataProducto:
-        #automataProducto(s)
+    elif banderaAutomataProducto:
+        automataProducto(s)
     elif s.token == "ID":
         estado = 0
         banderaAutomataRestaurante = True
@@ -299,13 +375,17 @@ for s in tablaSimbolos:
         estado = 0
         temporal = (Data("Sección ",s.lexema))
         banderaAutomataSeccion = True
-    #elif s.token == "simbolo_llave_abre":
-        #estado = 0
-        #banderaAutomataProducto = True
+    elif s.token == "simbolo_llave_abre":
+        estado = 0
+        banderaAutomataProducto = True
     else:
         indicarEerror(s.lexema,"",s.linea,s.columna)
 
 print("----------Data Restaurante ------------------------")
 for a in tablaRestaurante:
-    print(a.id + ": " + str(a.valor))
+    if(a.id=="Nombre Restaurante" or a.id=="Sección "):
+        print(a.id + ": " + str(a.valor))
+    else:
+        print(a.id + ": " + str(a.valor)) 
+        #print("-------- Fin Automatas del sintactico----------------")
     
