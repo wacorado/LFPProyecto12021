@@ -72,3 +72,11 @@ def automataProducto(s):
             estado = -1
             banderaAutomataProducto = False
             indicarEerror(s.lexema,"]",s.linea,s.columna)
+
+
+
+for a in tablaRestaurante:
+    if(a.id=="Nombre Restaurante" or a.id=="Sección "):
+        print(a.id + ": " + str(a.valor))
+    else:
+        print(a.id + ": " + str(a.valor)) 

@@ -6,6 +6,12 @@ class simbolo:
         self.lexema = lexema
         self.linea = linea
         self.columna = columna
+class cliente:
+    def __init__(self, token, lexema, linea, columna):
+        self.token = token
+        self.lexema = lexema
+        self.linea = linea
+        self.columna = columna
 class Data:
     def __init__(self,id,valor):
         self.id = id
@@ -39,7 +45,8 @@ idConcaten = ""
 numConcaten = ""
 cadConcaten = ""
 valor = ""
-listaProducTemp = []
+cadenaProductosTemp=""
+
 #-------------------------------------------------------------------------
 def letras(c):
     return (ord(c) >= 65 and ord(c) <= 90) or (ord(c) >= 97 and ord(c) <= 122)
@@ -85,6 +92,9 @@ def erNumero(c):
         columna += 1
         numConcaten += c
         return 
+    elif ord(c) == 32: #espacio
+        columna += 1
+        numConcaten += ""
 
     columna += 1
     tablaSimbolos.append(simbolo("NUMERO",numConcaten,fila,(columna - 1 - len(numConcaten))))
@@ -92,33 +102,19 @@ def erNumero(c):
     banderaAutomataNumero = False
 
 def erCadenas(c):
-    global cadConcaten,columna,fila,banderaAutomataCadena, valor 
-
-    if ord(c) == 39:
+    global cadConcaten,columna,fila,banderaAutomataCadena 
+    if letras(c) or numeros(c) or ord(c)==95 or ord(c)==45 or ord(c)==35 or ord(c)==44:
+        cadConcaten += c
+        columna += 1
+    elif ord(c) == 39:
         columna += 1
         cadConcaten += c 
         tablaSimbolos.append(simbolo("CADENA",cadConcaten,fila,(columna - 1 - len(cadConcaten))))
         cadConcaten = ""
         banderaAutomataCadena = False
         return;
-    elif ord(c) == 32: #espacio
-        columna += 1
-        valor = ""
-    columna += 1
-    cadConcaten += c
-
-def erSeccion(c):
-    global valor, columna,fila,banderaErSeccion
-    if letras(c) or numeros(c) or ord(c)==95:
-        valor += c
-        columna += 1
-        return ;
-    elif ord (c) == 58: #signo :
-        tablaSimbolos.append(simbolo("SECCION",valor,fila,(columna - len(valor))))
-        columna += 1
-        tablaSimbolos.append(simbolo("simbolo_2Puntos",":",fila,(columna - 2)))
-        valor=""
-        banderaErSeccion=False
+    else:
+        indicarEerror(c,"CADENA",fila,columna)
     
 def analizadorLexico(c):
     global fila, columna, banderaAutomataId, idConcaten, banderaAutomataNumero, numConcaten, cadConcaten, valor, banderaAutomataCadena, banderaErSeccion
@@ -156,7 +152,6 @@ def analizadorLexico(c):
         columna += 1
         idConcaten = ""
         numConcaten = ""
-        cadConcaten = ""
         valor = ""
     elif ord(c) == 59: #;
         columna += 1
@@ -191,26 +186,8 @@ def analizadorLexico(c):
     else:
         indicarEerror(c,"",fila,columna) 
 
-def erNombreCliente(c):
-    global valor,columna,fila,banderaErNombreCliente
-    if ord(c) == 39:
-        columna += 1
-        valor += c 
-        tablaSimbolos.append(simbolo("Nombre",valor,fila,(columna - 1 - len(cadConcaten))))
-        valor = ""
-        banderaAutomataCadena = False
-        return;
-    #elif ord(c) == 32: #espacio
-    #    columna += 1
-    #    valor = ""
-    elif ord(c) == 44: #,
-        columna +=1
-        valor = ""
-    columna += 1
-    valor += c
-
 def analizadorLexicoFactura(c):
-    global fila, columna, valor, banderaAutomataCaden
+    global fila, columna, valor
     if banderaAutomataCadena:
         erNombreCliente(c)
     #elif banderaErSeccion:
@@ -261,12 +238,13 @@ def automataSeccion(s):
             indicarEerror(a.lexema,"Seccion de Comida",a.linea,a.columna)
 
 def automataProducto(s):
-    global temporal,tablaRestaurante,estado,banderaAutomataProducto,valor,listaProducTemp
+    global temporal,tablaRestaurante,estado,banderaAutomataProducto,cadenaProductosTemp
     if estado==0:
         if(s.token=="ID"):
             estado=1
-            temporal = Data("Producto",valor)
-            listaProducTemp.append(s.lexema)
+            temporal = Data("Producto","")
+            #listaProducTemp.append(s.lexema)
+            cadenaProductosTemp = cadenaProductosTemp+";"+s.lexema
         else:
             estado = -1
             banderaAutomataProducto = False
@@ -281,7 +259,8 @@ def automataProducto(s):
     elif estado==2:
         if (s.token=="CADENA"):
             estado=3
-            listaProducTemp.append(s.lexema)
+            #listaProducTemp.append(s.lexema)
+            cadenaProductosTemp = cadenaProductosTemp+";"+s.lexema
         else:
             estado = -1
             banderaAutomataProducto = False
@@ -296,46 +275,39 @@ def automataProducto(s):
     elif estado ==4:
         if (s.token=="NUMERO"):
             estado = 5
-            listaProducTemp.append(s.lexema)
+            #listaProducTemp.append(s.lexema)
+            cadenaProductosTemp = cadenaProductosTemp+";"+s.lexema
         else:
             estado = -1
             banderaAutomataProducto = False
             indicarEerror(s.lexema,"Precio de Producto",s.linea,s.columna)
     elif estado ==5:
-        if (s.token=="simbolo_PuntoComa"):
-            estado=6
-        else:
-            estado = -1
-            banderaAutomataProducto = False
-            indicarEerror(s.lexema,";",s.linea,s.columna)
-    elif estado ==6:
         if s.token =="CADENA":
-            estado = 7
-            listaProducTemp.append(s.lexema)
-            #temporal.valor.descripcion=s.lexema
-            #temporal.valor.Productos.descripcion=s.lexema
-            temporal.valor=listaProducTemp
-            tablaRestaurante.append(temporal)
-            temporal=None
-            listaProducTemp.clear
+            estado = 6
+            #listaProducTemp.append(s.lexema)
+            cadenaProductosTemp = cadenaProductosTemp+";"+s.lexema
         else:
             estado = -1
             banderaAutomataProducto = False
             indicarEerror(s.lexema,"Descripcion de Producto",s.linea,s.columna)
-    elif estado==7:
-        if s.token == "simbolo_llave_cierra": #estado de aceptacion
+    elif estado==6:
+        if s.token=="simbolo_PuntoComa":
+            estado=0
+            banderaAutomataProducto = False
+        elif s.token == "simbolo_llave_cierra": #estado de aceptacion
+            temporal.valor=cadenaProductosTemp
+            tablaRestaurante.append(temporal)
+            temporal=None
+            #listaProducTemp.clear
             estado = 0
+            cadenaProductosTemp=""
             banderaAutomataProducto = False
         else:
             estado = -1
             banderaAutomataProducto = False
             indicarEerror(s.lexema,"]",s.linea,s.columna)
-    
-
-
-
-    
-def leerArchivo():
+        
+def leerArchivoMenu():
     archivo = askopenfilename()#Abre la interfaz para escoger el archivo a cargar
     print(archivo)
     archivoLectura = open('' + archivo + '', 'r')
@@ -348,7 +320,7 @@ def leerArchivo():
     print("---------------- Carga de Archivo Exitosa --------------")
     print("\n")
 
-leerArchivo()
+leerArchivoMenu()
 #------------------------- Impresion de resultado Sintactico -----------------------
 print("--------------- Resultado Sintactico -----------------")
 for a in tablaSimbolos:
@@ -382,10 +354,7 @@ for s in tablaSimbolos:
         indicarEerror(s.lexema,"",s.linea,s.columna)
 
 print("----------Data Restaurante ------------------------")
-for a in tablaRestaurante:
-    if(a.id=="Nombre Restaurante" or a.id=="Sección "):
-        print(a.id + ": " + str(a.valor))
-    else:
-        print(a.id + ": " + str(a.valor)) 
+for obj in tablaRestaurante:
+    print(obj.id+" : "+str(obj.valor))
         #print("-------- Fin Automatas del sintactico----------------")
     
