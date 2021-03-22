@@ -1,0 +1,53 @@
+
+    h1{
+		color: #1E90FF;
+		font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+		margin: 45px;     
+		width: 960px; 
+		text-align: center;    
+		border-collapse: collapse; 
+    	align-self: center;
+	}
+	h3{
+		color: #1E90FF;
+		font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+		margin: 45px;     
+		width: 960px; 
+		text-align: center;    
+		border-collapse: collapse; 
+    	align-self: center;
+	}
+	h5{
+		color: #1E90FF;
+		font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+		margin: 45px;     
+		width: 960px; 
+		text-align: center;    
+		border-collapse: collapse; 
+    	align-self: center;
+	}
+
+	#titlo{
+		background-image: url("https://i.pinimg.com/originals/9e/2c/61/9e2c6136cdce4f06296c90d5ac76b132.jpg");
+		background-size: 100%;
+	}
+	
+	body{
+		background-image: url("https://media.istockphoto.com/vectors/abstract-gray-gradient-color-background-vector-id1063375198?k=6&m=1063375198&s=612x612&w=0&h=5qECPZD0GGYNkNZBtxCVEfwgSoO3VUoIWjoG7uP9ODA=");
+		background-repeat: no-repeat;
+		background-size: 100%;
+		opacity: 60%;
+		text-align: center;
+	}
+	table {     font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    	font-size: 12px;    margin: 45px;     width: 960px; text-align: center;    border-collapse: collapse; 
+    	align-self: center;
+    }
+
+	th {     font-size: 13px;     font-weight: normal;     padding: 8px;     background: #b9c9fe;
+    	border-top: 4px solid #aabcfe;    border-bottom: 1px solid #fff; color: #039; }
+
+	td {    padding: 8px;     background: #e8edff;     border-bottom: 1px solid #fff;
+    	color: #669;    border-top: 1px solid transparent; }
+
+	tr:hover td { background: #d0dafd; color: #339; }

@@ -80,3 +80,46 @@ for a in tablaRestaurante:
         print(a.id + ": " + str(a.valor))
     else:
         print(a.id + ": " + str(a.valor)) 
+
+
+
+
+
+def generarFactura():
+    file = open("Factura.html","w")
+    file.write("<!DOCTYPE HTML>")
+    file.write("<htm lang = \"es\">")
+    file.write("<head>")
+    file.write("<TITLE>Resultado en HTML</TITLE>")
+    file.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Style.css\">")
+    file.write("</head>")
+    file.write("<body>")
+    file.write("<div id = \"titulo\">")
+    file.write("<h1>FACTURA</h1>")
+    file.write("</div>")
+    file.write("<div id = \"TABLA ERRORES\">")
+    for obj in tablaCliente:
+        if(obj.id=="NOMBRE"):
+            file.write("<h3> Nombre: "+obj.valor+"</h3>")
+        elif(obj.id=="NIT"):
+            file.write("<h3> NIT: "+obj.valor+"</h3>")
+        elif(obj.id=="Direccion"):
+            file.write("<h3> DIRECCION: "+obj.valor+"</h3>")
+        elif(obj.id=="%"):
+            file.write("<h3> %PROPINA: "+obj.valor+"%</h3>")
+            file.write("\n")
+            file.write("\n")
+            file.write("\n")
+            file.write("\n")
+            file.write("<h3>DETALLE FACTURA</h3>")
+        elif(obj.id=="Cantidad Prod")
+            file.write("<h3>"+obj.valor+"</h3>")
+    file.write("</div>")
+    file.write("<br>")
+    file.write("<table>")
+    file.write("<p><h3>  Walther Andree Corado Paiz </h3></p>")
+    file.write("<p><h3>  Carnet: 201313861 </h3></p>")
+    file.write("<p><h3>  Lenguajes Formales B- </h3></p>")
+    file.write("</div>")
+    file.write("</body>")
+    file.write("</htmlL>")

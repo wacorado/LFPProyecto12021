@@ -415,7 +415,6 @@ def automataNombreCliente(s):
             banderaAutomataNombreCliente = False
             indicarEerror(s.lexema,"%",s.linea,s.columna)
 
-
 def automataDetalleFactura(s):
     global temporal,tablaCliente,estado,banderaDetalleFactura
     if estado == 0:
@@ -467,8 +466,6 @@ def automataDirCliente(s):
             banderaAutomataDirCliente = False
             indicarEerror(s.lexema,"Direccion",s.linea,s.columna)
     
-
-
 def leerArchivoMenu():
     archivo = askopenfilename()#Abre la interfaz para escoger el archivo a cargar
     print(archivo)
@@ -495,8 +492,176 @@ def leerArchivoFactura():
     print("---------------- Carga de Archivo Exitosa --------------")
     print("\n")
 
+def generarMenu():
+    file = open("Menu.html","w")
+    file.write("<!DOCTYPE HTML>")
+    file.write("<htm lang = \"es\">")
+    file.write("<head>")
+    file.write("<TITLE>Resultado en HTML</TITLE>")
+    file.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Style.css\">")
+    file.write("</head>")
+    file.write("<body>")
+    file.write("<div id = \"titulo\">")
+    file.write("<h1>Menu Restaurante</h1>")
+    file.write("</div>")
+    file.write("<div id = \"NombreRestaurante\">")
+    for obj in tablaRestaurante:
+        if(obj.id=="Nombre Restaurante"):
+            file.write("<h1>"+obj.valor+"</h1>")
+            file.write("\n")
+    file.write("</div>")
+    for obj in tablaRestaurante:
+        file.write("<div id = \"Seccion\">")
+        if(obj.id=="Sección"):
+            file.write("<h3>"+obj.valor+"</h3>")
+            file.write("</div>")
+            file.write("<div id = \"Producto\">")
+        elif(obj.id=="Producto"):
+            productoDetalle=obj.valor.split(";")
+            for i in productoDetalle:
+                file.write("<table>")
+                file.write("<tr><td>"+i+"</td></tr>")
+                file.write("\n")
+                file.write("</table>")
+                file.write("</div>")
+    file.write("</div>")
+    file.write("<br>")
+    file.write("<table>")
+    file.write("<p><h3>  Walther Andree Corado Paiz </h3></p>")
+    file.write("<p><h3>  Carnet: 201313861 </h3></p>")
+    file.write("<p><h3>  Lenguajes Formales B- </h3></p>")
+    file.write("</div>")
+    file.write("</body>")
+    file.write("</htmlL>")
 
-#leerArchivoMenu()
+def generarErrores():
+    file = open("Errores.html","w")
+    file.write("<!DOCTYPE HTML>")
+    file.write("<htm lang = \"es\">")
+    file.write("<head>")
+    file.write("<TITLE>Resultado en HTML</TITLE>")
+    file.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Style.css\">")
+    file.write("</head>")
+    file.write("<body>")
+    file.write("<div id = \"titulo\">")
+    file.write("<h1>Tabla Erroes</h1>")
+    file.write("</div>")
+    file.write("<div id = \"TABLA ERRORES\">")
+    for obj in tablaErrores:
+        file.write("<h4>"+obj+"</h4>")
+    file.write("</div>")
+    file.write("<br>")
+    file.write("<table>")
+    file.write("<p><h3>  Walther Andree Corado Paiz </h3></p>")
+    file.write("<p><h3>  Carnet: 201313861 </h3></p>")
+    file.write("<p><h3>  Lenguajes Formales B- </h3></p>")
+    file.write("</div>")
+    file.write("</body>")
+    file.write("</htmlL>")
+
+def generarFactura():
+    file = open("Factura.html","w")
+    file.write("<!DOCTYPE HTML>")
+    file.write("<htm lang = \"es\">")
+    file.write("<head>")
+    file.write("<TITLE>Resultado en HTML</TITLE>")
+    file.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/Style.css\">")
+    file.write("</head>")
+    file.write("<body>")
+    file.write("<div id = \"titulo\">")
+    file.write("<h1>FACTURA</h1>")
+    file.write("</div>")
+    file.write("<div id = \"TABLA ERRORES\">")
+    for obj in tablaCliente:
+        if(obj.id=="Nombre Cliente"):
+            file.write("<h3> Nombre: "+obj.valor+"</h3>")
+        elif(obj.id=="NIT"):
+            file.write("<h3> NIT: "+obj.valor+"</h3>")
+        elif(obj.id=="Direccion"):
+            file.write("<h3> DIRECCION: "+obj.valor+"</h3>")
+        elif(obj.id=="%"):
+            file.write("<h3> %PROPINA: "+obj.valor+"%</h3>")
+            file.write("\n")
+            file.write("\n")
+            file.write("\n")
+            file.write("\n")
+            file.write("<h3>DETALLE FACTURA</h3>")
+        elif(obj.id=="Cantidad Prod"):
+            file.write("<h3>"+obj.valor+"</h3>")
+    file.write("</div>")
+    file.write("<br>")
+    file.write("<table>")
+    file.write("<p><h3>  Walther Andree Corado Paiz </h3></p>")
+    file.write("<p><h3>  Carnet: 201313861 </h3></p>")
+    file.write("<p><h3>  Lenguajes Formales B- </h3></p>")
+    file.write("</div>")
+    file.write("</body>")
+    file.write("</htmlL>")
+
+'''
+def Restaurante():
+    leerArchivoMenu()
+    print("--------------- Resultado Sintactico -----------------")
+    for a in tablaSimbolos:
+        print(a.token+" _ "+a.lexema)
+    print("--------------- ERRORES CAPTURADOS -----------------")
+    for obj in tablaErrores:
+        print(obj)
+
+    for s in tablaSimbolos:
+        if banderaAutomataRestaurante:
+            automataNombreRestaurante(s)
+        elif banderaAutomataSeccion:
+            automataSeccion(s)
+        elif banderaAutomataProducto:
+            automataProducto(s)
+        elif s.token == "ID":
+            estado = 0
+            banderaAutomataRestaurante = True
+        elif s.token == "CADENA":
+            estado = 0
+            temporal = (Data("Sección ",s.lexema))
+            banderaAutomataSeccion = True
+        elif s.token == "simbolo_llave_abre":
+            estado = 0
+            banderaAutomataProducto = True
+        else:
+            indicarEerror(s.lexema,"",s.linea,s.columna)
+    print("----------Data Restaurante ------------------------")
+    for obj in tablaRestaurante:
+        print(obj.id+" : "+str(obj.valor))
+
+def Factura():
+    leerArchivoFactura()
+    print("--------------- Resultado Sintactico -----------------")
+    for obj in tablaSFactura:
+        print(obj.token+" _ "+obj.lexema)
+    print("--------------- ERRORES CAPTURADOS -----------------")
+    for obj in tablaErrores:
+        print(obj)
+
+    for s in tablaSFactura:
+        if banderaAutomataNombreCliente:
+            automataNombreCliente(s)
+        elif banderaDetalleFactura:
+            automataDetalleFactura(s)
+        elif s.token == "CADENAF":
+            estado = 0 
+            temporal = Data("Nombre Cliente",s.lexema)
+            banderaAutomataNombreCliente = True
+        elif s.token == "NUMERO":
+            estado = 0
+            temporal = Data("Cantidad Prod",s.lexema)
+            banderaDetalleFactura = True
+        else:
+            indicarEerror(s.lexema,"",s.linea,s.columna)
+    print("----------Data Restaurante ------------------------")
+    for obj in tablaCliente:
+        print(obj.id+" : "+ str(obj.valor))
+'''
+
+
+leerArchivoMenu()
 leerArchivoFactura()
 #------------------------- Impresion de resultado Sintactico -----------------------
 print("--------------- Resultado Sintactico -----------------")
@@ -524,7 +689,7 @@ for s in tablaSimbolos:
         banderaAutomataRestaurante = True
     elif s.token == "CADENA":
         estado = 0
-        temporal = (Data("Sección ",s.lexema))
+        temporal = (Data("Sección",s.lexema))
         banderaAutomataSeccion = True
     elif s.token == "simbolo_llave_abre":
         estado = 0
@@ -559,4 +724,9 @@ for obj in tablaRestaurante:
 for obj in tablaCliente:
     print(obj.id+" : "+ str(obj.valor))
         #print("-------- Fin Automatas del sintactico----------------")
-    
+
+generarMenu()
+generarFactura()
+generarErrores()
+
+
