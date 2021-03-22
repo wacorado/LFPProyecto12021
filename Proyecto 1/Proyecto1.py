@@ -28,16 +28,20 @@ tablaErrores =[]
 tablaSimbolos=[]
 tablaSFactura=[]
 tablaRestaurante =[]
+tablaCliente = []
 fila = 1
 columna = 1
 banderaAutomataId = False
 banderaAutomataNumero = False
 banderaAutomataCadena = False
 banderaAutomataRestaurante = False
-banderaErNombreCliente = False
+banderaErCadenaFactura = False
+banderaErNumeroFactura = False
 banderaErSeccion = False
 banderaAutomataSeccion = False
 banderaAutomataProducto = False
+banderaAutomataNombreCliente= False
+banderaDetalleFactura = False
 estado = 0
 temporal = None
 banderaErSeccion = False
@@ -178,6 +182,11 @@ def analizadorLexico(c):
         valor = c
         tablaSimbolos.append(simbolo("simbolo_2Puntos",c,fila,(columna - 2)))
         valor = ""
+    elif ord(c) == 44: #,
+        columna += 1
+        valor = c
+        tablaSimbolos.append(simbolo("simbolo_coma",c,fila,(columna - 2)))
+        valor = ""
     elif ord(c) == 46: #.
         columna += 1
         valor = c
@@ -186,21 +195,62 @@ def analizadorLexico(c):
     else:
         indicarEerror(c,"",fila,columna) 
 
+def erCadenasFacturas(c):
+    global valor,columna,fila,banderaErCadenaFactura 
+    if letras(c) or numeros(c) or ord(c)==95 or ord(c)==45 or ord(c)==35 or ord(c)==44:
+        valor += c
+        columna += 1
+    elif ord(c) == 39 or ord(c)==10:
+        columna += 1
+        valor += c 
+        tablaSFactura.append(simbolo("CADENAF",valor,fila,(columna - 1 - len(valor))))
+        valor = ""
+        banderaErCadenaFactura = False
+        return;
+    else:
+        indicarEerror(c,"CADENAFactura",fila,columna)
+
+def erNumeroFacturas(c):
+    global columna,fila,banderaErNumeroFactura,numConcaten
+    if numeros(c) or ord(c)==46:
+        columna += 1
+        numConcaten += c
+        return 
+    elif ord(c) == 32 or ord(c)==44 or ord(c)==10: #espacio
+        columna += 1
+        tablaSFactura.append(simbolo("NUMERO",numConcaten,fila,(columna - 1 - len(numConcaten))))
+        numConcaten = ""
+        banderaErNumeroFactura = False
+
 def analizadorLexicoFactura(c):
-    global fila, columna, valor
-    if banderaAutomataCadena:
-        erNombreCliente(c)
-    #elif banderaErSeccion:
-    #    erSeccion(c)
+    global fila, columna, valor,numConcaten,banderaErCadenaFactura, banderaErNumeroFactura
+    if banderaErCadenaFactura:
+        erCadenasFacturas(c)
+    elif banderaErNumeroFactura:
+        erNumeroFacturas(c)
     elif letras(c):
         columna +=1
-        banderaAutomataId = True
-        #banderaErSeccion = True
-        idConcaten = c
+        valor = c
+        banderaErCadenaFactura = True
     elif numeros(c):
         columna +=1
-        banderaAutomataNumero =  True
+        banderaErNumeroFactura =  True
         numConcaten = c
+    elif ord(c) == 39: # '
+        banderaErCadenaFactura = True 
+        valor = c
+        columna += 1
+    elif ord(c) == 44: #,
+        columna += 1
+        valor = c
+        tablaSFactura.append(simbolo("simbolo_coma",c,fila,(columna - 2)))
+        valor = ""
+    elif ord(c) == 10: #salto de linea
+        fila += 1
+        columna = 0
+        valor = ""
+    else:
+        indicarEerror(c,"",fila,columna) 
 
 def automataNombreRestaurante(s):
     global temporal,tablaRestaurante,estado,banderaAutomataRestaurante
@@ -306,7 +356,119 @@ def automataProducto(s):
             estado = -1
             banderaAutomataProducto = False
             indicarEerror(s.lexema,"]",s.linea,s.columna)
-        
+
+def automataNombreCliente(s):
+    global temporal,tablaCliente,estado,banderaAutomataNombreCliente
+    if estado == 0:
+        if(s.token=="simbolo_coma"):
+            tablaCliente.append(temporal)# Estado de Aceptacion para Nombre de Cliente
+            estado = 1
+            temporal = None
+            banderaAutomataNombreCliente = True
+        else:
+            estado = -1
+            banderaAutomataNombreCliente = False
+            indicarEerror(s.lexema,"NOMBRE",s.linea,s.columna)
+    elif estado == 1:
+        if(s.token=="CADENAF"):
+            temporal = Data ("NIT",s.lexema)
+            tablaCliente.append(temporal)
+            estado = 2
+            temporal = None
+        else:
+            estado = -1
+            banderaAutomataNombreCliente = False
+            indicarEerror(s.lexema,"NIT",s.linea,s.columna)
+    elif estado == 2:
+        if(s.token=="simbolo_coma"):
+            estado = 3
+        else:
+            estado = -1
+            banderaAutomataNombreCliente = False
+            indicarEerror(s.lexema,",",s.linea,s.columna)
+    elif estado == 3:
+        if(s.token=="CADENAF"):
+            temporal = Data ("Direccion",s.lexema)
+            tablaCliente.append(temporal)
+            estado = 4
+            temporal = None
+        else:
+            estado = -1
+            banderaAutomataNombreCliente = False
+            indicarEerror(s.lexema,"Direccion",s.linea,s.columna)
+    elif estado == 4:
+        if(s.token=="simbolo_coma"):
+            estado = 5
+        else:
+            estado = -1
+            banderaAutomataNombreCliente = False
+            indicarEerror(s.lexema,",",s.linea,s.columna)
+    elif estado == 5:
+        if(s.token=="NUMERO"):
+            temporal = Data ("%",s.lexema)
+            tablaCliente.append(temporal)
+            estado = 0
+            temporal = None
+            banderaAutomataNombreCliente = False
+        else:
+            estado = -1
+            banderaAutomataNombreCliente = False
+            indicarEerror(s.lexema,"%",s.linea,s.columna)
+
+
+def automataDetalleFactura(s):
+    global temporal,tablaCliente,estado,banderaDetalleFactura
+    if estado == 0:
+        if(s.token=="simbolo_coma" or s.token=="CADENAF"):
+            if(s.token=="CADENAF"):
+                temporal.valor=temporal.valor+";"+str(s.lexema)
+                tablaCliente.append(temporal)# Estado de Aceptacion para Nombre de Cliente
+                estado = 0
+                temporal = None
+                banderaDetalleFactura = False
+            elif(s.token=="simbolo_coma"):
+                tablaCliente.append(temporal)# Estado de Aceptacion para Nombre de Cliente
+                estado = 1
+                banderaDetalleFactura = True
+            else:
+                estado = -1
+                banderaDetalleFactura = False
+                indicarEerror(s.lexema,"Cantidad",s.linea,s.columna)
+    elif(estado==1):
+        if(s.token=="CADENAF"):
+            temporal.valor=temporal.valor+";"+str(s.lexema)
+            tablaCliente.append(temporal)# Estado de Aceptacion para Nombre de Cliente
+            estado = 0
+            temporal = None
+            banderaDetalleFactura = False
+        else:
+            estado = -1
+            banderaDetalleFactura = False
+            indicarEerror(s.lexema,"Cantidad",s.linea,s.columna)
+
+def automataDirCliente(s):
+    global temporal,tablaCliente,estado,banderaAutomataDirCliente
+    if estado == 0:
+        if(s.token=="simbolo_coma"):
+            estado = 1
+        else:
+            estado = -1
+            banderaAutomataDirCliente = False
+            indicarEerror(s.lexema,"Direccion",s.linea,s.columna)
+    elif estado == 1:
+        if(s.token=="CADENAF"):
+            temporal = Data("Direccion",s.lexema)
+            tablaCliente.append(temporal)# Estado de Aceptacion para Nombre de Cliente
+            estado = 0
+            temporal = None
+            banderaAutomataDirCliente = False
+        else:
+            estado = -1
+            banderaAutomataDirCliente = False
+            indicarEerror(s.lexema,"Direccion",s.linea,s.columna)
+    
+
+
 def leerArchivoMenu():
     archivo = askopenfilename()#Abre la interfaz para escoger el archivo a cargar
     print(archivo)
@@ -320,11 +482,28 @@ def leerArchivoMenu():
     print("---------------- Carga de Archivo Exitosa --------------")
     print("\n")
 
-leerArchivoMenu()
+def leerArchivoFactura():
+    archivo = askopenfilename()#Abre la interfaz para escoger el archivo a cargar
+    print(archivo)
+    archivoLectura = open('' + archivo + '', 'r')
+    for linea in archivoLectura:
+        print(linea)
+        lineaCaracteres = list(linea)
+        for obj in lineaCaracteres:
+            analizadorLexicoFactura(obj)
+        lineaCaracteres.clear
+    print("---------------- Carga de Archivo Exitosa --------------")
+    print("\n")
+
+
+#leerArchivoMenu()
+leerArchivoFactura()
 #------------------------- Impresion de resultado Sintactico -----------------------
 print("--------------- Resultado Sintactico -----------------")
 for a in tablaSimbolos:
     print(a.token+" _ "+a.lexema)
+for obj in tablaSFactura:
+    print(obj.token+" _ "+obj.lexema)
 
 #---------------------------Impresione de Errores -------------------------------
 print("\n")
@@ -353,8 +532,31 @@ for s in tablaSimbolos:
     else:
         indicarEerror(s.lexema,"",s.linea,s.columna)
 
+
+for s in tablaSFactura:
+    if banderaAutomataNombreCliente:
+        automataNombreCliente(s)
+    elif banderaDetalleFactura:
+        automataDetalleFactura(s)
+    elif s.token == "CADENAF":
+        estado = 0 
+        temporal = Data("Nombre Cliente",s.lexema)
+        banderaAutomataNombreCliente = True
+    elif s.token == "NUMERO":
+        estado = 0
+        temporal = Data("Cantidad Prod",s.lexema)
+        banderaDetalleFactura = True
+
+        
+    else:
+        indicarEerror(s.lexema,"",s.linea,s.columna)
+
+
 print("----------Data Restaurante ------------------------")
 for obj in tablaRestaurante:
     print(obj.id+" : "+str(obj.valor))
+
+for obj in tablaCliente:
+    print(obj.id+" : "+ str(obj.valor))
         #print("-------- Fin Automatas del sintactico----------------")
     
